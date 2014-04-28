@@ -1,26 +1,35 @@
 // YOUR CODE HERE:
 
 var app = {};
-app.lastUpdate = Date.now();
+app.lastUpdate = new Date().toISOString();
+app.room = 'lobby';
 
 app.init = function () {
   $('#sendButton').click(function(event) {
     var username = window.location.search.match(/username=([\w]*)/);
     username = username[1] || 'Anonymous';
-    var message = $('#inputMsg').val();
-    app.send({
-      username: username,
-      text: message,
-      roomname: 'Lobby'
-    });
+    var message = $.trim($('#inputMsg').val());
+    if (message.slice(0, 5) === '/join') {
+      app.room = message.split(' ')[1].toLowerCase();
+      $('#roomName').text('Room: ' + app.room);
+      $('#chatContainer').html('');
+    } else {
+      app.send({
+        username: username,
+        text: message,
+        roomname: app.room
+      });
+    }
   });
-  app.fetch();
+
+  $('#roomName').text('Room: ' + app.room);
+  setInterval(app.fetch, 2000);
 };
 
 app.send = function(msgObject) {
   msgObject.username = msgObject.username || 'Anonymous';
   msgObject.text = msgObject.text || '';
-  msgObject.roomname = msgObject.roomname || 'Lobby';
+  msgObject.roomname = msgObject.roomname || 'lobby';
 
   $.ajax({
     url: 'https://api.parse.com/1/classes/chatterbox',
@@ -41,17 +50,23 @@ app.fetch = function() {
   $.ajax({
     url: 'https://api.parse.com/1/classes/chatterbox?order=-createdAt',
     where: {
-      'createdAt': {'$gte': app.lastUpdate}
+      'createdAt': {'$gte': {'__type': 'Date', 'iso': app.lastUpdate}}
     },
     type: 'GET',
     success: function (data) {
       console.log(data);
-      _.each(data.results, function(msgObject) {
+      var newMessages = _.filter(data.results, function(value) {
+        value.roomname = value.roomname || 'lobby';
+        return (value.createdAt > app.lastUpdate && value.roomname === app.room);
+      });
+      for (var i = newMessages.length - 1; i >= 0; i--) {
+        var msgObject = data.results[i];
         msgObject.username = msgObject.username || 'Anonymous';
         msgObject.text = msgObject.text || '';
+        //msgObject.roomname = msgObject.roommname || 'lobby';
         app.render(msgObject);
-      });
-      app.lastUpdate = data.results[99].createdAt;
+      }
+      app.lastUpdate = newMessages.length ? newMessages[0].createdAt : app.lastUpdate;
     },
     error: function (data) {
       console.error('chatterbox: Failed to fetch messages');
@@ -61,7 +76,7 @@ app.fetch = function() {
 
 app.render = function (msgObject) {
   var template = _.template('<div><%- username %>: <%- text %></div>');
-  $('#main').append(template(msgObject));
+  $('#chatContainer').append(template(msgObject));
 };
 
 $(document).ready(function() {
