@@ -83,3 +83,8 @@ form input[type=text] {
 .spinner img {
     padding: 10px;
 }
+
+.befriend:hover {
+    color: #888;
+    cursor: pointer;
+}

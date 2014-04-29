@@ -3,6 +3,7 @@
 var app = {};
 app.lastUpdate = new Date().toISOString();
 app.room = 'lobby';
+app.friends = [];
 
 app.init = function () {
   $('#sendButton').click(function(event) {
@@ -63,7 +64,6 @@ app.fetch = function() {
         var msgObject = data.results[i];
         msgObject.username = msgObject.username || 'Anonymous';
         msgObject.text = msgObject.text || '';
-        //msgObject.roomname = msgObject.roommname || 'lobby';
         app.render(msgObject);
       }
       app.lastUpdate = newMessages.length ? newMessages[0].createdAt : app.lastUpdate;
@@ -75,8 +75,16 @@ app.fetch = function() {
 };
 
 app.render = function (msgObject) {
-  var template = _.template('<div><%- username %>: <%- text %></div>');
-  $('#chatContainer').append(template(msgObject));
+  var template = _.template('<div><span class="befriend"><%- username %></span>: <%- text %></div>');
+
+  var $message = $(template(msgObject));
+
+  if (_.contains(app.friends, msgObject.username)) $message.css({fontWeight: 800})
+
+  $('#chatContainer').append($message);
+  $('.befriend').click(function() {
+    app.friends.push($(this).text());
+  });
 };
 
 $(document).ready(function() {
