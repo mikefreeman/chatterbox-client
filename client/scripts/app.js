@@ -3,7 +3,7 @@
 var app = {};
 app.lastUpdate = new Date().toISOString();
 app.room = 'lobby';
-app.friends = [];
+app.friends = {};
 
 app.init = function () {
   $('#sendButton').click(function(event) {
@@ -21,6 +21,7 @@ app.init = function () {
         roomname: app.room
       });
     }
+    $('#inputMsg').val('');
   });
 
   $('#roomName').text('Room: ' + app.room);
@@ -55,7 +56,6 @@ app.fetch = function() {
     },
     type: 'GET',
     success: function (data) {
-      console.log(data);
       var newMessages = _.filter(data.results, function(value) {
         value.roomname = value.roomname || 'lobby';
         return (value.createdAt > app.lastUpdate && value.roomname === app.room);
@@ -79,11 +79,11 @@ app.render = function (msgObject) {
 
   var $message = $(template(msgObject));
 
-  if (_.contains(app.friends, msgObject.username)) $message.css({fontWeight: 800})
+  if (app.friends[msgObject.username]) $message.css({fontWeight: 800})
 
-  $('#chatContainer').append($message);
-  $('.befriend').click(function() {
-    app.friends.push($(this).text());
+  $('#chatContainer').append($message.hide().fadeIn());
+  $('.befriend').click(function(event) {
+    app.friends[$(event.target).text()] = true;
   });
 };
 
