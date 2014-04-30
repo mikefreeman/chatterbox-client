@@ -6,6 +6,25 @@ app.room = 'lobby';
 app.friends = {};
 
 app.init = function () {
+  $('#inputMsg').keydown(function(event) {
+    if (event.keyCode !== 13) return;
+    var username = window.location.search.match(/username=([\w]*)/);
+    username = username[1] || 'Anonymous';
+    var message = $.trim($('#inputMsg').val());
+    if (message.slice(0, 5) === '/join') {
+      app.room = message.split(' ')[1].toLowerCase();
+      $('#roomName').text('Room: ' + app.room);
+      $('#chatContainer').html('');
+    } else {
+      app.send({
+        username: username,
+        text: message,
+        roomname: app.room
+      });
+    }
+    $('#inputMsg').val('');
+  });
+
   $('#sendButton').click(function(event) {
     var username = window.location.search.match(/username=([\w]*)/);
     username = username[1] || 'Anonymous';
@@ -81,10 +100,11 @@ app.render = function (msgObject) {
 
   if (app.friends[msgObject.username]) $message.css({fontWeight: 800})
 
-  $('#chatContainer').append($message.hide().fadeIn());
+  $('#chatContainer').append($message.hide().fadeIn()).scrollTop(10000000);
   $('.befriend').click(function(event) {
     app.friends[$(event.target).text()] = true;
   });
+
 };
 
 $(document).ready(function() {

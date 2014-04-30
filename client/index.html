@@ -3,24 +3,28 @@
   <head>
     <meta charset="utf-8">
     <title>chatterbox</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles/styles.css">
 
     <!-- dependencies -->
     <script src="bower_components/jquery/jquery.min.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- your scripts -->
     <script src="scripts/config.js"></script>
     <script src="scripts/app.js"></script>
   </head>
   <body>
-    <div id="main">
+    <div class="container">
       <h1>chatterbox</h1>
       <div id="roomName"></div>
-      <input id="inputMsg" width="40">
-      <input id="sendButton" type="button" value="Send">
-      <div id="chatContainer">
-      </div>
+      <div id="chatContainer" class="chatContainer">
+
+
+    </div>
       <!-- Your HTML goes here! -->
     </div>
+    <input id="inputMsg">
+    <input id="sendButton" type="button" value="Send">
   </body>
 </html>
